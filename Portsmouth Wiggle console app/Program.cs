@@ -145,7 +145,7 @@ namespace Portsmouth_Wiggle_console_app
 
             basket.displayVouchers();
 
-            basket.applyDiscounts(basket.offerVoucherDiscount().Item1, basket.giftVoucherDiscount(), basket.offerVoucherDiscount().Item2);
+            basket.applyDiscounts(basket.offerVoucherDiscount().Item2, basket.offerVoucherDiscount().Item1, basket.giftVoucherDiscount() );
 
             Console.ReadLine();
 

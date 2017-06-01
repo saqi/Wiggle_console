@@ -232,9 +232,9 @@ public class Basket
 
 
     // function: offer voucher discount
-    public Tuple<decimal, string> offerVoucherDiscount(decimal discount = 0, string message = "")
+    public Tuple<decimal, string> offerVoucherDiscount(decimal discount = 0)
     {
-        //string message = "";
+        string message = "";
 
         if (offerVoucherExists())
         {
@@ -247,7 +247,9 @@ public class Basket
                 }
                 else
                 {
-                    message += "Add £" + (offerVouchers[0].Threshold - totalPrice().Item3) + " value to the basket.\n";
+                    decimal amount = ((offerVouchers[0].Threshold + (decimal)0.01) - totalPrice().Item3);
+                    string amnt = amount.ToString("F");
+                    message += "Add £" + amnt + " value to the basket.\n";
                     return Tuple.Create(Convert.ToDecimal(0), message);
                 }
             } // //No category just threshold , now if category
@@ -255,32 +257,51 @@ public class Basket
             { // //category, check for threshold & matching
                 if (totalPrice().Item3 < offerVouchers[0].Threshold) // Threshold not met
                 {
-                    message += "Add £" + Convert.ToString((offerVouchers[0].Threshold - totalPrice().Item3)) + " value to the basket.\n";
+                    decimal amount = ((offerVouchers[0].Threshold + (decimal)0.01) - totalPrice().Item3);
+                    string amnt = amount.ToString("F");
+                    message += "Add £" + amnt + " value to the basket.\n";
                     return Tuple.Create(Convert.ToDecimal(0), message);
                 }
-                else if (totalPrice().Item3 > offerVouchers[0].Threshold && offerVoucherCategoryMatches()) //threshold met and basket has appropriate product for voucher
+                else if (totalPrice().Item3 > offerVouchers[0].Threshold  ) //threshold met and basket has appropriate product for voucher
                 {
-                    //return discount amount
-                    decimal categoryTotals = 0, discountToApply = 0;
-                    foreach (var product in Products)
+                    if (offerVoucherCategoryMatches()) //if category matches,
                     {
-                        if (!product.Category.Equals("") && product.Category.Equals(this.offerVouchers[0].ProductCategory))
-                            categoryTotals += product.Price;
-                    }
-                    //only apply discount 
-                    discount = categoryTotals - this.offerVouchers[0].Amount;
-                    if (discount < 0)
-                    {
-                        return Tuple.Create(Convert.ToDecimal(0), message);
+                        //return discount amount
+                        decimal categoryTotals = 0, discountToApply = 0;
+                        foreach (var product in Products)
+                        {
+                            if ( product.Category.Equals(this.offerVouchers[0].ProductCategory))
+                                categoryTotals += (product.Price * product.Quantity); //Add total product value to deduct discount from 
+                        }
+                        //only apply discount 
+                        discountToApply = categoryTotals - this.offerVouchers[0].Amount;
+                        if (discountToApply < 0)
+                        {
+                            message += "voucher applied to products only.";
+                            return Tuple.Create(categoryTotals, message);
+                        }
+                        else
+                        {
+                            message += "voucher applied to products.";
+                            return Tuple.Create(discountToApply, message);
+                        }
                     }
                     else
                     {
-                        return Tuple.Create(Convert.ToDecimal(discountToApply), message);
+                        message += "There are no products in the basket that are applicable to voucher " + this.offerVouchers[0].Description + ".";
+                        return Tuple.Create(Convert.ToDecimal(0), message);
                     }
+                }
+                else if (!(totalPrice().Item3 > offerVouchers[0].Threshold)) //doesn't exceed threshold
+                {
+                    decimal amount = ((offerVouchers[0].Threshold + (decimal)0.01) - totalPrice().Item3);
+                    string amnt = amount.ToString("F");
+                    message += "Add £" + amnt + " value to the basket.\n";
                 }
                 else
                 {
-                    message += "There are no products in your basket applicable to voucher " + this.offerVouchers[0].Description + ".\n";
+
+                    message += "There are no products in your basket applicable to voucher " + Convert.ToString(this.offerVouchers[0].Description) + ".\n";
                     return Tuple.Create(Convert.ToDecimal(0), message);
                 }
             }
@@ -308,7 +329,7 @@ public class Basket
     }
 
     //Apply discount on basket, if total < 0 return 0
-    public Tuple<decimal, string> applyDiscounts(decimal offerVDiscount = 0, decimal giftVDiscount = 0, string message = "")
+    public Tuple<decimal, string> applyDiscounts(string message, decimal offerVDiscount = 0, decimal giftVDiscount = 0)
     {
         var totalDiscount = offerVDiscount + giftVDiscount;
 
@@ -322,6 +343,7 @@ public class Basket
         }
 
         Console.WriteLine("Total: £" + (totalPrice().Item1 - totalDiscount));
+        Console.WriteLine(message);
 
         return Tuple.Create(totalPrice().Item1 - totalDiscount, message);
 
