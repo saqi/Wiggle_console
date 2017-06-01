@@ -13,7 +13,7 @@ namespace Portsmouth_Wiggle_console_app
             string response = "";
             string vouch = "";
             string PDescription = "";
-            float PPrice = 0;
+            decimal PPrice = 0;
             int PQuantity = 0;
             string PCategory = "";
             bool PGiftV;
@@ -22,8 +22,8 @@ namespace Portsmouth_Wiggle_console_app
             string voucherType;
             int offerVoucher = 0; //Number of offer vouchers being applied - limit is 1
             string voucherDescription = "";
-            float voucherAmount = 0;
-            float voucherThreshold = 0;
+            decimal voucherAmount = 0;
+            decimal voucherThreshold = 0;
             string voucherCategory = "";
 
             do
@@ -37,7 +37,7 @@ namespace Portsmouth_Wiggle_console_app
                 PDescription = Console.ReadLine();
 
                 Console.WriteLine("Please enter the price of the product.");
-                float.TryParse(Console.ReadLine(), out PPrice);
+                decimal.TryParse(Console.ReadLine(), out PPrice);
 
                 Console.WriteLine("Please enter the quantity of the product.");
                 int.TryParse(Console.ReadLine(), out PQuantity);
@@ -89,10 +89,10 @@ namespace Portsmouth_Wiggle_console_app
                     voucherDescription = Console.ReadLine();
 
                     Console.WriteLine("Please enter the amount the voucher will reduce. e.g. 5.00");
-                    float.TryParse(Console.ReadLine(), out voucherAmount);
+                    decimal.TryParse(Console.ReadLine(), out voucherAmount);
 
                     Console.WriteLine("Please enter the minimum threshold amount of the basked for the voucher to apply. e.g. 50.00");
-                    float.TryParse(Console.ReadLine(), out voucherThreshold);
+                    decimal.TryParse(Console.ReadLine(), out voucherThreshold);
 
                     Console.WriteLine("Is this offer voucher limited to a certain category of products? Y/N");
                     voucherCategory = Console.ReadLine();
@@ -103,7 +103,7 @@ namespace Portsmouth_Wiggle_console_app
                         voucherCategory = Console.ReadLine();
 
                         OfferVoucher voucher = new OfferVoucher(voucherDescription, voucherAmount, voucherThreshold, voucherCategory);
-                        basket.Vouchers.Add(voucher);
+                        basket.offerVouchers.Add(voucher);
                         Console.WriteLine("");
                         Console.WriteLine("Voucer added to the basket.");
                         continue;
@@ -112,7 +112,7 @@ namespace Portsmouth_Wiggle_console_app
                     else
                     {
                         OfferVoucher voucher = new OfferVoucher(voucherDescription, voucherAmount, voucherThreshold);
-                        basket.Vouchers.Add(voucher);
+                        basket.offerVouchers.Add(voucher);
                         Console.WriteLine("");
                         Console.WriteLine("Voucer added to the basket.");
                         continue;
@@ -130,25 +130,24 @@ namespace Portsmouth_Wiggle_console_app
                     voucherDescription = Console.ReadLine();
 
                     Console.WriteLine("Please enter the amount the voucher will reduce. e.g. 5.00");
-                    float.TryParse(Console.ReadLine(), out voucherAmount);
+                    decimal.TryParse(Console.ReadLine(), out voucherAmount);
                    
-                    basket.Vouchers.Add(new GiftVoucher(voucherDescription, voucherAmount));
+                    basket.giftVouchers.Add(new GiftVoucher(voucherDescription, voucherAmount));
                     Console.WriteLine("");
-                    Console.WriteLine("Voucer added to the basket.");
+                    Console.WriteLine("Voucher added to the basket.");
                 }
                 
-
-
-
             } while (vouch.Equals("Y".ToLower())); // do while loop to apply voucher to basket
 
             // Doesn't/No longer wants to add voucher, start logic
 
             basket.displayProducts();
 
+            basket.displayVouchers();
+
+            basket.applyDiscounts(basket.offerVoucherDiscount().Item1, basket.giftVoucherDiscount(), basket.offerVoucherDiscount().Item2);
 
             Console.ReadLine();
-
 
         } // end of main
     }
